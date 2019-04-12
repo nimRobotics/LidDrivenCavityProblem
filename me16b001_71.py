@@ -43,17 +43,18 @@ def calculation():
     a,b,u,v = initialize()
     u[0,:]=1  #  top layer with vel = U
     wMat,psiMat = bcsApply(a,b,u,v)
-    print("\nBC applied\n wmatrix",wMat,"\n psiMat\n",psiMat)
+    print("\nBC applied\n wmatrix",wMat,"\n psiMat\n",psiMat,"\n u \n",u,"\n v \n",v)
+    print(dx)
 
-    tItMax=10000
+    tItMax=100000
     tIt=0
     timeSteps = []
     while tIt<tItMax:
         # find in the velocities u,v from psiMat
         for i in range(1,ny):
             for j in range(1,nx):
-                u[i,j] = (psiMat[i,j+1]-psiMat[i,j-1])/(dy[i]+dy[i-1])
-                v[i,j] = -(psiMat[i+1,j]-psiMat[i-1,j])/(dx[i]+dx[i-1])
+                u[i,j] = (1/r)*(psiMat[i,j+1]-psiMat[i,j-1])/(dy[i]+dy[i-1])
+                v[i,j] = -(1/r)*(psiMat[i+1,j]-psiMat[i-1,j])/(dx[i]+dx[i-1])
         # print("\nu",u,"\nv",v)
 
         dt = cflAnal(u,v,tIt)
@@ -73,12 +74,13 @@ def calculation():
         print("\nwMat at time ",tIt," step ",wMat)
 
         # calculation of psiMat at time n+1 using Iteration
-        pItMax=1000
+        pItMax=100000
         pIt=0
         while pIt<pItMax:
             for i in range(1,nx):
                 for j in range(1,ny):
                     # stream function equation
+                    psiMatOld = psiMat
                     ddx = dx[i-1]*(dx[i]**2)+dx[i]*(dx[i-1]**2)
                     ddy = dy[i-1]*(dy[i]**2)+dy[i]*(dy[i-1]**2)
 
@@ -87,8 +89,9 @@ def calculation():
                     psiMat[i,j] = a*( wMat[i,j] + (2*(dx[i-1]*psiMat[i+1,j]+dx[i]*psiMat[i-1,j])/ddx) + \
                                        ((1/(r**2))*2*(dy[i-1]*psiMat[i,j+1]+dy[i]*psiMat[i,j-1])/ddy))
                     # resiudal
-                    res1 = wMat[i,j] + (2*(dx[i-1]*psiMat[i+1,j]+dx[i]*psiMat[i-1,j]-(dx[i]+dx[i-1])*psiMat[i,j])/ddx) \
-                          + ((1/(r**2))*2*(dy[i-1]*psiMat[i,j+1]+dy[i]*psiMat[i,j-1]-(dy[i]+dy[i-1])*psiMat[i,j])/ddy)
+                    # res1 = wMat[i,j] + (2*(dx[i-1]*psiMat[i+1,j]+dx[i]*psiMat[i-1,j]-(dx[i]+dx[i-1])*psiMat[i,j])/ddx) \
+                    #       + ((1/(r**2))*2*(dy[i-1]*psiMat[i,j+1]+dy[i]*psiMat[i,j-1]-(dy[i]+dy[i-1])*psiMat[i,j])/ddy)
+                    res1=np.amax(abs(psiMatOld-psiMat))
 
             if abs(res1)<(10**(-6)):
                 print("Iteration finished")
@@ -97,32 +100,34 @@ def calculation():
             pIt=pIt+1 # counter for psiMat Iterations
         print("\npsiMat at ",tIt," step ",psiMat)
 
-        if sum(timeSteps)>=time:
-            print("Reached the time ",sum(timeSteps))
-            # y=[0]
-            # for i in range(ny):
-            #     y.append(y[len(y)-1]+dy[i])
-            # plt.scatter(y,u[int((nx-1)/2),:])
-            # plt.xlabel('y/H')
-            # plt.ylabel('u/U')
-            # plt.title("u/U vs y/H at x=D/2, Re="+str(Re)+" and time t=" + str(time))
-            plt.contour(flipud(psiMat),10,  extend='both')
-            plt.savefig("rC"+str(Re)+"t"+str(time)+".png")
+        # if sum(timeSteps)>=time:
+        #     print("Reached the time ",sum(timeSteps))
+        #     y=[0]
+        #     for i in range(ny):
+        #         y.append(y[len(y)-1]+dy[i])
+        #     plt.scatter(y,u[int((nx-1)/2),:])
+        #     plt.xlabel('y/H')
+        #     plt.ylabel('u/U')
+        #     plt.title("u/U vs y/H at x=D/2, Re="+str(Re)+" and time t=" + str(time))
+        #     plt.savefig("uU_Re"+str(Re)+"t"+str(time)+".png")
+        #     # plt.contour(flipud(psiMat),10,  extend='both')
+        #     # plt.savefig("Re"+str(Re)+"t"+str(time)+".png")
+        #     break
 
-            break
         tIt=tIt+1 # counter for time steps
 
-        ##time varying contour plot, uncomment below code to see streamLinePlot
-        # plt.ion()
-        # cs = plt.contour(flipud(psiMat),10,  extend='both')
-        # cs.cmap.set_over('red')
-        # cs.cmap.set_under('blue')
-        # cs.changed()
-        # plt.pause(0.0001)
-        # plt.clf()
+        #time varying contour plot, uncomment below code to see streamLinePlot
+        plt.ion()
+        cs = plt.contour(flipud(psiMat),10,  extend='both')
+        cs.cmap.set_over('red')
+        cs.cmap.set_under('blue')
+        cs.changed()
+        plt.pause(0.0001)
+        plt.clf()
 
         print("\n U \n",u)
         print("\n V \n",v)
+        wMat,psiMat = bcsApply(wMat,psiMat,u,v)
 
 # users input params
 nx=64  # grids in x dir
@@ -130,7 +135,7 @@ ny=64  # grids in y dir
 U = 1  # mormalized plate velocity
 Re = 1 # reynolds number
 r = 1 # aspect ratio
-time = 0.5
+time = 4
 x,y=grid(nx,ny,3)   # accepts (nx, ny, stretching param)
 dx=spacing(x)  # grid divisions, symmetric
 dy=spacing(y)  # grid divisions, symmetric
