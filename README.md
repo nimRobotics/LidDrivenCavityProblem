@@ -5,7 +5,9 @@ There two main python files
 * `unsteadySteady.py` Contains the simulation for the transient regime
 * `steadySteady.py` Contains the simulation for the steady state regime
 
+To see the in-depth details and the physics of the problem please refer to the [projectReport.pdf](https://github.com/AakashSYadav/LidDrivenCavityProblem/blob/master/projectReport.pdf)
+
 The below image show the simulation for the unsteady state analysis.
 ![](media/sim.gif)
 
-To see the in-depth details and the physics of the problem please refer to the [projectReport.pdf](https://github.com/AakashSYadav/LidDrivenCavityProblem/blob/master/projectReport.pdf)
+
