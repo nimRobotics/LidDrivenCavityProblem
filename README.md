@@ -10,7 +10,7 @@ To see the in-depth details and the physics of the problem please refer to the [
 
 | Code | Report |
 |------|--------|
-|https://github.com/nimRobotics/LidDrivenCavityProblem | https://github.com/AakashSYadav/LidDrivenCavityProblem/blob/master/projectReport.pdf |
+|<https://github.com/nimRobotics/LidDrivenCavityProblem> | <https://github.com/AakashSYadav/LidDrivenCavityProblem/blob/master/projectReport.pdf> |
 
 The below image show the simulation for the unsteady state analysis.
 ![](media/sim.gif)
